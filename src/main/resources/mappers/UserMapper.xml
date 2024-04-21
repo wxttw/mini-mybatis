@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mapper namespace="basic">
+    <select id="selectList" parameterType="java.lang.Long"
+            resultType="com.hjj.test.pojo.User" statementType="prepared">
+        SELECT * FROM user WHERE id = #{id}
+    </select>
+</mapper>
