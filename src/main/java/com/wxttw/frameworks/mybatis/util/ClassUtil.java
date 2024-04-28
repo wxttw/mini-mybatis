@@ -26,11 +26,11 @@ public class ClassUtil {
         return null;
     }
 
-    public static <T> Object getPrivateFieldValue(Class<T> parameterTypeClass, String fieldName, Object object) {
+    public static <T> Object getPrivateFieldValue(Class<T> parameterTypeClass, Object parameter, String fieldName) {
         try {
             Field field = parameterTypeClass.getDeclaredField(fieldName);
             field.setAccessible(true);
-            return field.get(object);
+            return field.get(parameter);
         } catch (Exception e) {
             log.error(e.getMessage());
         }

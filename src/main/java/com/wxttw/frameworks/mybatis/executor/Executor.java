@@ -13,5 +13,7 @@ import java.util.List;
  */
 public interface Executor {
 
-    <T> List<T> selectList(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException;
+    <T> List<T> query(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException;
+
+    Integer update(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException;
 }

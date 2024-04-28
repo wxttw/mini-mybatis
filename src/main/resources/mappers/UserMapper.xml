@@ -1,7 +1,28 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<mapper namespace="basic">
-    <select id="selectList" parameterType="java.lang.Long"
+<mapper namespace="com.hjj.test.mapper.UserMapper">
+
+    <select id="selectList"
+            resultType="com.hjj.test.pojo.User" statementType="prepared">
+        SELECT * FROM user
+    </select>
+
+    <select id="selectOne" parameterType="java.lang.Long"
             resultType="com.hjj.test.pojo.User" statementType="prepared">
         SELECT * FROM user WHERE id = #{id}
     </select>
+
+    <insert id="insert" parameterType="com.hjj.test.pojo.User"
+            resultType="java.lang.Integer" statementType="prepared">
+        INSERT INTO user VALUES (null, #{username})
+    </insert>
+
+    <update id="update" parameterType="com.hjj.test.pojo.User"
+            resultType="java.lang.Integer" statementType="prepared">
+        UPDATE user SET username=#{username} WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="java.lang.Long"
+            resultType="java.lang.Integer" statementType="prepared">
+        DELETE FROM user WHERE id = #{id}
+    </delete>
 </mapper>

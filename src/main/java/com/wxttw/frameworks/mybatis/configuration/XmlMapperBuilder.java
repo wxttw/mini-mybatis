@@ -4,6 +4,8 @@ import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.mapping.SqlSource;
 import com.wxttw.frameworks.mybatis.util.ClassUtil;
 import com.wxttw.frameworks.mybatis.util.DocumentReader;
+import com.wxttw.frameworks.mybatis.util.SqlCommandType;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -17,6 +19,7 @@ import java.util.List;
  * @date 2024/4/5 23:56
  * @description: 解析所有的Mapper配置文件，封装所以SQL语句标签到MappedStatement对象中
  */
+@Slf4j
 public class XmlMapperBuilder {
 
     private InputStream inputStream;
@@ -47,6 +50,7 @@ public class XmlMapperBuilder {
         allElements.addAll(rootElement.elements("delete"));
 
         allElements.forEach(element -> {
+            String sqlCommandType = element.getName().toUpperCase();
             String id = this.namespace + "." + element.attributeValue("id");
             String statementType = element.attributeValue("statementType");
             String parameterType = element.attributeValue("parameterType");
@@ -58,6 +62,7 @@ public class XmlMapperBuilder {
                     .parameterTypeClass(ClassUtil.getClazz(parameterType))
                     .resultTypeClass(ClassUtil.getClazz(resultType))
                     .sqlSource(new SqlSource(element.getTextTrim()))
+                    .sqlCommandType(SqlCommandType.valueOf(sqlCommandType))
                     .build());
         });
 

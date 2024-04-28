@@ -5,7 +5,10 @@ import com.wxttw.frameworks.mybatis.executor.Executor;
 import com.wxttw.frameworks.mybatis.executor.SimpleExecutor;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
+import com.wxttw.frameworks.mybatis.util.SqlCommandType;
+import lombok.extern.slf4j.Slf4j;
 
+import java.lang.reflect.*;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
@@ -15,6 +18,7 @@ import java.util.Objects;
  * @date 2024/4/7 14:34
  * @description: TODO
  */
+@Slf4j
 public class DefaultSqlSession implements SqlSession {
 
     private Configuration configuration;
@@ -48,20 +52,54 @@ public class DefaultSqlSession implements SqlSession {
     @Override
     public <T> List<T> selectList(String statementId, Object params) throws SQLException {
         MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        return executor.selectList(configuration, mappedStatement, params);
+        return executor.query(configuration, mappedStatement, params);
     }
 
-/*    @Override
-    public <T> T getMapper(Class<?> classType) {
-        Proxy.newProxyInstance(classType.getClassLoader(), new Class[]{classType}, new InvocationHandler() {
+    @Override
+    public Integer insert(String statementId, Object params) throws SQLException {
+        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+        return executor.update(configuration, mappedStatement, params);
+    }
+
+    @Override
+    public Integer update(String statementId, Object params) throws SQLException {
+        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+        return executor.update(configuration, mappedStatement, params);
+    }
+
+    @Override
+    public Integer delete(String statementId, Object params) throws SQLException {
+        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+        return executor.update(configuration, mappedStatement, params);
+    }
+
+    @Override
+    public <T> T getMapper(Class<T> type) {
+        Object proxyInstance = Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new InvocationHandler() {
             @Override
-            public Object invoke(Object proxy, Method method, Object[] args) {
+            public Object invoke(Object proxy, Method method, Object[] args) throws SQLException {
 
+                //方法名
                 String methodName = method.getName();
+                //接口全限定名
+                String className = method.getDeclaringClass().getName();
+                String statementId = className + "." + methodName;
+                //获取方法被调用的返回值类型
+                Type genericReturnType = method.getGenericReturnType();
 
-                return null;
+                MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+
+                if (SqlCommandType.INSERT.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                    return insert(statementId, args);
+                } else if (SqlCommandType.UPDATE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                    return update(statementId, args);
+                } else if (SqlCommandType.DELETE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                    return delete(statementId, args);
+                }
+                return genericReturnType instanceof ParameterizedType ?
+                        selectList(statementId, args) : selectOne(statementId, args);
             }
         });
-        return null;
-    }*/
+        return (T) proxyInstance;
+    }
 }

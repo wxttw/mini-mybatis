@@ -11,7 +11,14 @@ import java.util.List;
 public interface SqlSession {
 
     <E> E selectOne(String statementId, Object obj) throws SQLException;
+
     <E> List<E> selectList(String statementId, Object obj) throws SQLException;
 
-    /*<T> T getMapper(Class<?> type);*/
+    Integer insert(String statementId, Object obj) throws SQLException;
+
+    Integer update(String statementId, Object obj) throws SQLException;
+
+    Integer delete(String statementId, Object obj) throws SQLException;
+
+    <T> T getMapper(Class<T> type);
 }

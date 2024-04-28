@@ -1,5 +1,6 @@
 package com.wxttw.frameworks.mybatis.mapping;
 
+import com.wxttw.frameworks.mybatis.util.SqlCommandType;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,5 @@ public class MappedStatement {
     private Class<?> resultTypeClass;
     private String statementType;
     private SqlSource sqlSource;
+    private SqlCommandType sqlCommandType;
 }

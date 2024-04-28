@@ -14,6 +14,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 /**
@@ -25,9 +26,15 @@ import java.util.Optional;
 public class SimpleExecutor implements Executor {
 
     @Override
-    public <T> List<T> selectList(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException {
+    public <T> List<T> query(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException {
         Connection connection = getConnection(configuration);
         return handleStatementSelect(connection, mappedStatement, params);
+    }
+
+    @Override
+    public Integer update(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException {
+        Connection connection = getConnection(configuration);
+        return handleStatementUpdate(connection, mappedStatement, params);
     }
 
     private Connection getConnection(Configuration configuration) throws SQLException {
@@ -57,6 +64,39 @@ public class SimpleExecutor implements Executor {
         return (List<E>) result;
     }
 
+    private Integer handleStatementUpdate(Connection connection, MappedStatement mappedStatement, Object params) throws SQLException {
+
+        try {
+            BoundSql boundSql = mappedStatement.getSqlSource().getBoundSql();
+            String sql = boundSql.getOriginalSql();
+
+            PreparedStatement preparedStatement = connection.prepareStatement(sql);
+            //获得参数类型
+            Class<?> parameterTypeClass = mappedStatement.getParameterTypeClass();
+            //获得参数名称
+            List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
+
+            if ("BASIC".equals(getParamenteTypeString(parameterTypeClass))) {
+                preparedStatement.setObject(1, params);
+            } else {
+                //Object
+                for (int i = 0; i < parameterMappings.size(); i++) {
+                    ParameterMapping parameterMapping = parameterMappings.get(i);
+                    String fieldName = parameterMapping.getContent();
+
+                    Object fieldValue = ClassUtil.getPrivateFieldValue(parameterTypeClass, params, fieldName);
+                    preparedStatement.setObject(i + 1, fieldValue);
+                }
+            }
+            return preparedStatement.executeUpdate();
+
+        } catch (Exception e) {
+            // TODO: handle exception
+            log.error("handleStatementUpdate-exception: {}", e.getMessage());
+            throw new SQLException(e.getMessage());
+        }
+    }
+
     /**
      * JDBC操作
      *
@@ -75,21 +115,25 @@ public class SimpleExecutor implements Executor {
             PreparedStatement preparedStatement = connection.prepareStatement(sql);
             //获得参数类型
             Class<?> parameterTypeClass = mappedStatement.getParameterTypeClass();
-            //获得参数名称
-            List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 
-            if ("BASIC".equals(getParamenteTypeString(parameterTypeClass))) {
-                preparedStatement.setObject(1, params);
-            } else {
-                //Object
-                for (int i = 0; i < parameterMappings.size(); i++) {
-                    ParameterMapping parameterMapping = parameterMappings.get(i);
-                    String name = parameterMapping.getContent();
+            if (Objects.nonNull(parameterTypeClass)) {
+                //获得参数名称
+                List<ParameterMapping> parameterMappings = boundSql.getParameterMappings();
 
-                    Object fieldValue = ClassUtil.getPrivateFieldValue(parameterTypeClass, name, params);
-                    preparedStatement.setObject(i + 1, fieldValue);
+                if ("BASIC".equals(getParamenteTypeString(parameterTypeClass))) {
+                    preparedStatement.setObject(1, params);
+                } else {
+                    //Object
+                    for (int i = 0; i < parameterMappings.size(); i++) {
+                        ParameterMapping parameterMapping = parameterMappings.get(i);
+                        String fieldName = parameterMapping.getContent();
+
+                        Object fieldValue = ClassUtil.getPrivateFieldValue(parameterTypeClass, params, fieldName);
+                        preparedStatement.setObject(i + 1, fieldValue);
+                    }
                 }
             }
+
 
             //TODO:resultset handler
             Class<?> resultTypeClass = mappedStatement.getResultTypeClass();
