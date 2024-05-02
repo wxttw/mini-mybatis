@@ -1,0 +1,6 @@
+1.解析核心配置文件和mapper的xml文件，并封装Configuration对象
+2.Connection的实现+SqlSession的实现+#{}的解析处理
+3.executor的实现
+4.添加transaction manager
+5.更新mapper的代理
+6.添加parameter handler和resultset handler

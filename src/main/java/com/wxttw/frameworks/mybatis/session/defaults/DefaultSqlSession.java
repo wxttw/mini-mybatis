@@ -24,7 +24,8 @@ public class DefaultSqlSession implements SqlSession {
     private Configuration configuration;
     private Executor executor;
 
-    public DefaultSqlSession(Configuration configuration, Executor executor) {
+    public
+    DefaultSqlSession(Configuration configuration, Executor executor) {
         this.configuration = configuration;
 
         if (Objects.isNull(executor)) {
@@ -75,30 +76,27 @@ public class DefaultSqlSession implements SqlSession {
 
     @Override
     public <T> T getMapper(Class<T> type) {
-        Object proxyInstance = Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, new InvocationHandler() {
-            @Override
-            public Object invoke(Object proxy, Method method, Object[] args) throws SQLException {
 
-                //方法名
-                String methodName = method.getName();
-                //接口全限定名
-                String className = method.getDeclaringClass().getName();
-                String statementId = className + "." + methodName;
-                //获取方法被调用的返回值类型
-                Type genericReturnType = method.getGenericReturnType();
+        Object proxyInstance = Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, (proxy, method, args) -> {
+            //方法名
+            String methodName = method.getName();
+            //接口全限定名
+            String className = method.getDeclaringClass().getName();
+            String statementId = className + "." + methodName;
+            //获取方法被调用的返回值类型
+            Type genericReturnType = method.getGenericReturnType();
 
-                MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
+            MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
 
-                if (SqlCommandType.INSERT.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                    return insert(statementId, args);
-                } else if (SqlCommandType.UPDATE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                    return update(statementId, args);
-                } else if (SqlCommandType.DELETE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                    return delete(statementId, args);
-                }
-                return genericReturnType instanceof ParameterizedType ?
-                        selectList(statementId, args) : selectOne(statementId, args);
+            if (SqlCommandType.INSERT.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                return insert(statementId, args);
+            } else if (SqlCommandType.UPDATE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                return update(statementId, args);
+            } else if (SqlCommandType.DELETE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
+                return delete(statementId, args);
             }
+            return genericReturnType instanceof ParameterizedType ?
+                    selectList(statementId, args) : selectOne(statementId, args);
         });
         return (T) proxyInstance;
     }

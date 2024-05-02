@@ -70,7 +70,7 @@ public class TestSqlSession {
             SqlSession sqlSession = factory.openSession();
 
             User user = new User();
-            user.setId(2L);
+            user.setId(3L);
             user.setUsername("leo");
             Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.update", user);
             System.out.println(res);
@@ -86,7 +86,7 @@ public class TestSqlSession {
             SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(inputStream);
             SqlSession sqlSession = factory.openSession();
 
-            Integer res = sqlSession.delete("com.hjj.test.mapper.UserMapper.delete", 2L);
+            Integer res = sqlSession.delete("com.hjj.test.mapper.UserMapper.delete", 3L);
             System.out.println(res);
         } catch (Exception e) {
             e.printStackTrace();
@@ -94,7 +94,6 @@ public class TestSqlSession {
     }
 
 
-    //TODO:need to test and fix
     @Test
     public void testMapper() {
         try {
@@ -103,7 +102,7 @@ public class TestSqlSession {
             SqlSession sqlSession = factory.openSession();
 
             UserMapper mapper = sqlSession.getMapper(UserMapper.class);
-            List<User> list = mapper.list();
+            List<User> list = mapper.selectList();
             System.out.println(list);
         } catch (Exception e) {
             e.printStackTrace();

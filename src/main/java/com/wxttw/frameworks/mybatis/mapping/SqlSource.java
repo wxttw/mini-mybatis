@@ -16,7 +16,6 @@ public class SqlSource {
 
     private String sqlText;
 
-
     public BoundSql getBoundSql() {
         //这是从mybatis源码中直接获得的工具类，用于解析sql获得原始的sql语句
         ParameterMappingTokenHandler tokenHandler = new ParameterMappingTokenHandler();

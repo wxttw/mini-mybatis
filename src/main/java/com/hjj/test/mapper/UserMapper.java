@@ -11,9 +11,9 @@ import java.util.List;
  */
 public interface UserMapper {
 
-    List<User> list();
+    List<User> selectList();
 
-    User findById(Long id);
+    User selectOne(Long id);
 
     int insert(User user);
 

@@ -56,7 +56,6 @@ public class XmlConfigBuilder {
                 String eleId = ele.attributeValue("id");
                 if (eleId != null && eleId.equals(attr)) {
                     parseDataSource(ele.element("dataSource"));
-
                     break;
                 }
             }
