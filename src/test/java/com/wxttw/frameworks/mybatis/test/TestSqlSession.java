@@ -108,4 +108,46 @@ public class TestSqlSession {
             e.printStackTrace();
         }
     }
+
+    @Test
+    public void testUpdateWithCommitAndRollback1() {
+        SqlSession sqlSession = null;
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
+            SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(inputStream);
+            sqlSession = factory.openSession(false);
+
+            User user = new User();
+            user.setId(1L);
+            user.setUsername("leo4");
+            Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.update", user);
+            sqlSession.commit();
+            System.out.println(res);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Test
+    public void testUpdateWithCommitAndRollback2() {
+        SqlSession sqlSession = null;
+        try {
+            InputStream inputStream = Resources.getResourceAsStream("mybatis-config.xml");
+            SqlSessionFactory factory = new SqlSessionFactoryBuilder().build(inputStream);
+            sqlSession = factory.openSession(false);
+
+            User user = new User();
+            user.setId(1L);
+            user.setUsername("leo2");
+            Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.update", user);
+            int i = 1/0;
+            sqlSession.commit();
+            System.out.println(res);
+        } catch (Exception e) {
+            if (sqlSession != null) {
+                sqlSession.rollback();
+            }
+            e.printStackTrace();
+        }
+    }
 }

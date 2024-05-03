@@ -1,6 +1,8 @@
 package com.wxttw.frameworks.mybatis.configuration;
 
+import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory;
 import com.wxttw.frameworks.mybatis.io.Resources;
+import com.wxttw.frameworks.mybatis.type.TypeAliasRegistry;
 import com.wxttw.frameworks.mybatis.util.DocumentReader;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.apache.commons.lang3.StringUtils;
@@ -9,7 +11,7 @@ import org.dom4j.Element;
 
 import java.io.InputStream;
 import java.util.List;
-import java.util.Optional;
+import java.util.Objects;
 import java.util.Properties;
 
 /**
@@ -21,10 +23,12 @@ public class XmlConfigBuilder {
 
     private InputStream inputStream;
     private Configuration configuration;
+    private TypeAliasRegistry typeAliasRegistry;
 
     public XmlConfigBuilder(InputStream inputStream) {
         this.inputStream = inputStream;
         this.configuration = new Configuration();
+        this.typeAliasRegistry = configuration.getTypeAliasRegistry();
     }
 
     public Configuration parse(InputStream inputStream) {
@@ -55,6 +59,7 @@ public class XmlConfigBuilder {
             for (Element ele : elements) {
                 String eleId = ele.attributeValue("id");
                 if (eleId != null && eleId.equals(attr)) {
+                    parseTransactionManager(ele.element("transactionManager"));
                     parseDataSource(ele.element("dataSource"));
                     break;
                 }
@@ -62,7 +67,20 @@ public class XmlConfigBuilder {
         } else {
             throw new RuntimeException("environments标签的default属性不能为空");
         }
+    }
 
+    private void parseTransactionManager(Element element) {
+        String type = element.attributeValue("type");
+        if (StringUtils.isBlank(type))
+            type = "JDBC";
+
+        try {
+            TransactionFactory factory = (TransactionFactory) resolveClass(type)
+                    .getDeclaredConstructor().newInstance();
+            configuration.setTransactionFactory(factory);
+        } catch (Exception e) {
+            throw new RuntimeException("Error resolving class. Cause: " + e, e);
+        }
 
     }
 
@@ -98,5 +116,9 @@ public class XmlConfigBuilder {
         String resource = element.attributeValue("resource");
         XmlMapperBuilder parser = new XmlMapperBuilder(Resources.getResourceAsStream(resource), configuration);
         parser.parse();
+    }
+
+    private <T> Class<? extends T> resolveClass(String alias) {
+        return Objects.isNull(alias) ? null : typeAliasRegistry.resolveAlias(alias);
     }
 }

@@ -21,18 +21,16 @@ import java.util.Objects;
 @Slf4j
 public class DefaultSqlSession implements SqlSession {
 
-    private Configuration configuration;
-    private Executor executor;
+    private final Configuration configuration;
+    private final Executor executor;
+    private final boolean autoCommit;
+    private boolean dirty;
 
-    public
-    DefaultSqlSession(Configuration configuration, Executor executor) {
+    public DefaultSqlSession(Configuration configuration, Executor executor, boolean autoCommit) {
         this.configuration = configuration;
-
-        if (Objects.isNull(executor)) {
-            this.executor = new SimpleExecutor();
-        } else {
-            //TODO:
-        }
+        this.executor = executor;
+        this.dirty = false;
+        this.autoCommit = autoCommit;
     }
 
     @Override
@@ -53,25 +51,64 @@ public class DefaultSqlSession implements SqlSession {
     @Override
     public <T> List<T> selectList(String statementId, Object params) throws SQLException {
         MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        return executor.query(configuration, mappedStatement, params);
+        return executor.query(mappedStatement, params);
     }
 
     @Override
     public Integer insert(String statementId, Object params) throws SQLException {
-        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        return executor.update(configuration, mappedStatement, params);
+        return update(statementId, params);
     }
 
     @Override
     public Integer update(String statementId, Object params) throws SQLException {
+        dirty = true;
         MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        return executor.update(configuration, mappedStatement, params);
+        return executor.update(mappedStatement, params);
     }
 
     @Override
     public Integer delete(String statementId, Object params) throws SQLException {
-        MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-        return executor.update(configuration, mappedStatement, params);
+        return update(statementId, params);
+    }
+
+    @Override
+    public void commit() {
+        commit(false);
+    }
+
+    @Override
+    public void commit(boolean force) {
+        try {
+            executor.commit(isCommitOrRollbackRequired(force));
+            dirty = false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error committing transaction.  Cause: " + e, e);
+        }
+    }
+
+    @Override
+    public void rollback() {
+        rollback(false);
+    }
+
+    @Override
+    public void rollback(boolean force) {
+        try {
+            executor.rollback(isCommitOrRollbackRequired(force));
+            dirty = false;
+        } catch (Exception e) {
+            throw new RuntimeException("Error rolling back transaction.  Cause: " + e, e);
+        }
+    }
+
+    @Override
+    public void close() {
+        executor.close(isCommitOrRollbackRequired(false));
+        dirty = false;
+    }
+
+    private boolean isCommitOrRollbackRequired(boolean force) {
+        return !autoCommit && dirty || force;
     }
 
     @Override

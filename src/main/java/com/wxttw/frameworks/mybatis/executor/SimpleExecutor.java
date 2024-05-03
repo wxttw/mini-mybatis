@@ -1,10 +1,13 @@
 package com.wxttw.frameworks.mybatis.executor;
 
 import com.wxttw.frameworks.mybatis.configuration.Configuration;
+import com.wxttw.frameworks.mybatis.configuration.transaction.Transaction;
 import com.wxttw.frameworks.mybatis.mapping.BoundSql;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.mapping.ParameterMapping;
 import com.wxttw.frameworks.mybatis.util.ClassUtil;
+import lombok.AllArgsConstructor;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import java.lang.reflect.Field;
@@ -15,7 +18,6 @@ import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 /**
  * @author jay
@@ -25,30 +27,31 @@ import java.util.Optional;
 @Slf4j
 public class SimpleExecutor implements Executor {
 
+    private Configuration configuration;
+    private Transaction transaction;
+
+    private boolean closed = false;
+
+    public SimpleExecutor(Configuration configuration, Transaction transaction){
+        this.configuration = configuration;
+        this.transaction = transaction;
+    }
+
+
     @Override
-    public <T> List<T> query(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException {
-        Connection connection = getConnection(configuration);
+    public <T> List<T> query(MappedStatement mappedStatement, Object params) throws SQLException {
+        Connection connection = getConnection();
         return handleStatementSelect(connection, mappedStatement, params);
     }
 
     @Override
-    public Integer update(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException {
-        Connection connection = getConnection(configuration);
+    public Integer update(MappedStatement mappedStatement, Object params) throws SQLException {
+        Connection connection = getConnection();
         return handleStatementUpdate(connection, mappedStatement, params);
     }
 
-    private Connection getConnection(Configuration configuration) throws SQLException {
-        return Optional.of(configuration)
-                .map(Configuration::getDataSource)
-                .map(dataSource -> {
-                    try {
-                        return dataSource.getConnection();
-                    } catch (SQLException e) {
-                        log.error(e.getMessage());
-                        throw new RuntimeException(e);
-                    }
-                })
-                .orElseThrow();
+    private Connection getConnection() throws SQLException {
+        return transaction.getConnection();
     }
 
     private <E> List<E> handleStatementSelect(Connection connection, MappedStatement mappedStatement, Object params) throws SQLException {
@@ -157,6 +160,41 @@ public class SimpleExecutor implements Executor {
             log.error("handlePreparedStatementSelect-exception: {}", e.getMessage());
         }
         return (List<E>) result;
+    }
+
+    @Override
+    public void commit(boolean required) throws SQLException {
+        if (closed) {
+            throw new RuntimeException("Cannot commit, transaction is already closed");
+        }
+        if (required) {
+            transaction.commit();
+        }
+    }
+
+    @Override
+    public void rollback(boolean required) throws SQLException {
+        if (!closed && required) {
+            transaction.rollback();
+        }
+    }
+
+    @Override
+    public void close(boolean forceRollback) {
+        try {
+            try {
+                rollback(forceRollback);
+            } finally {
+                if (transaction != null) {
+                    transaction.close();
+                }
+            }
+        } catch (SQLException e) {
+            log.warn("Unexpected exception on closing transaction.  Cause: " + e);
+        } finally {
+            transaction = null;
+            closed = true;
+        }
     }
 
     private String getParamenteTypeString(Class<?> clazz) {

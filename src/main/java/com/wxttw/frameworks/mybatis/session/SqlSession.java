@@ -20,5 +20,15 @@ public interface SqlSession {
 
     Integer delete(String statementId, Object obj) throws SQLException;
 
+    void commit();
+
+    void commit(boolean force);
+
+    void rollback();
+
+    void rollback(boolean force);
+
+    void close();
+
     <T> T getMapper(Class<T> type);
 }

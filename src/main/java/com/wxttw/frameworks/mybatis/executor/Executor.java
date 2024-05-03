@@ -1,6 +1,5 @@
 package com.wxttw.frameworks.mybatis.executor;
 
-import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 
 import java.sql.SQLException;
@@ -13,7 +12,13 @@ import java.util.List;
  */
 public interface Executor {
 
-    <T> List<T> query(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException;
+    <T> List<T> query(MappedStatement mappedStatement, Object params) throws SQLException;
 
-    Integer update(Configuration configuration, MappedStatement mappedStatement, Object params) throws SQLException;
+    Integer update(MappedStatement mappedStatement, Object params) throws SQLException;
+
+    void commit(boolean required) throws SQLException;
+
+    void rollback(boolean required) throws SQLException;
+
+    void close(boolean forceRollback);
 }
