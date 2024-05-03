@@ -2,16 +2,12 @@ package com.wxttw.frameworks.mybatis.session.defaults;
 
 import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.executor.Executor;
-import com.wxttw.frameworks.mybatis.executor.SimpleExecutor;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
-import com.wxttw.frameworks.mybatis.util.SqlCommandType;
 import lombok.extern.slf4j.Slf4j;
 
-import java.lang.reflect.*;
 import java.sql.SQLException;
 import java.util.List;
-import java.util.Objects;
 
 /**
  * @author jay
@@ -107,34 +103,17 @@ public class DefaultSqlSession implements SqlSession {
         dirty = false;
     }
 
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
     private boolean isCommitOrRollbackRequired(boolean force) {
         return !autoCommit && dirty || force;
     }
 
     @Override
     public <T> T getMapper(Class<T> type) {
-
-        Object proxyInstance = Proxy.newProxyInstance(type.getClassLoader(), new Class[]{type}, (proxy, method, args) -> {
-            //方法名
-            String methodName = method.getName();
-            //接口全限定名
-            String className = method.getDeclaringClass().getName();
-            String statementId = className + "." + methodName;
-            //获取方法被调用的返回值类型
-            Type genericReturnType = method.getGenericReturnType();
-
-            MappedStatement mappedStatement = configuration.getMappedStatementMap().get(statementId);
-
-            if (SqlCommandType.INSERT.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                return insert(statementId, args);
-            } else if (SqlCommandType.UPDATE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                return update(statementId, args);
-            } else if (SqlCommandType.DELETE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-                return delete(statementId, args);
-            }
-            return genericReturnType instanceof ParameterizedType ?
-                    selectList(statementId, args) : selectOne(statementId, args);
-        });
-        return (T) proxyInstance;
+        return configuration.getMapper(type, this);
     }
 }

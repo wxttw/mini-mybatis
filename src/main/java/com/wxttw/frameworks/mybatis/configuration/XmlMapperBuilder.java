@@ -66,5 +66,15 @@ public class XmlMapperBuilder {
                     .build());
         });
 
+        bindMapperForNamespace();
+    }
+
+    private void bindMapperForNamespace() {
+        Class<?> boundType = ClassUtil.getClazz(namespace);
+        if (boundType != null) {
+            if (!configuration.hasMapper(boundType)) {
+                configuration.addMapper(boundType);
+            }
+        }
     }
 }

@@ -1,5 +1,7 @@
 package com.wxttw.frameworks.mybatis.session;
 
+import com.wxttw.frameworks.mybatis.configuration.Configuration;
+
 import java.sql.SQLException;
 import java.util.List;
 
@@ -29,6 +31,8 @@ public interface SqlSession {
     void rollback(boolean force);
 
     void close();
+
+    Configuration getConfiguration();
 
     <T> T getMapper(Class<T> type);
 }

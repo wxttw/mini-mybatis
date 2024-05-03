@@ -1,8 +1,10 @@
 package com.wxttw.frameworks.mybatis.configuration;
 
+import com.wxttw.frameworks.mybatis.configuration.binding.MapperRegistry;
 import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory;
 import com.wxttw.frameworks.mybatis.configuration.transaction.jdbc.JdbcTransactionFactory;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
+import com.wxttw.frameworks.mybatis.session.SqlSession;
 import com.wxttw.frameworks.mybatis.type.TypeAliasRegistry;
 import lombok.Data;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -22,13 +24,33 @@ public class Configuration {
     private BasicDataSource dataSource;
 
     private final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
-    private Map<String, MappedStatement> mappedStatementMap = new HashMap<>();
+    private final MapperRegistry mapperRegistry = new MapperRegistry(this);
+    private final Map<String, MappedStatement> mappedStatementMap = new HashMap<>();
+
 
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
     }
 
+    public <T> T getMapper(Class<T> type, SqlSession sqlSession) {
+        return mapperRegistry.getMapper(type, sqlSession);
+    }
+
+    public void addMappers(String packageName) {
+        mapperRegistry.addMappers(packageName);
+    }
+
+    public <T> void addMapper(Class<T> type) {
+        mapperRegistry.addMapper(type);
+    }
+
+    public boolean hasMapper(Class<?> type) {
+        return mapperRegistry.hasMapper(type);
+    }
+
     public void addMappedStatement(String statementId, MappedStatement mappedStatement) {
         this.mappedStatementMap.put(statementId, mappedStatement);
     }
+
+
 }
