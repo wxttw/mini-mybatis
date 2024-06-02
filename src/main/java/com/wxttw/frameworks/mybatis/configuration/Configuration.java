@@ -6,6 +6,8 @@ import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory
 import com.wxttw.frameworks.mybatis.configuration.transaction.jdbc.JdbcTransactionFactory;
 import com.wxttw.frameworks.mybatis.executor.Executor;
 import com.wxttw.frameworks.mybatis.executor.SimpleExecutor;
+import com.wxttw.frameworks.mybatis.executor.resultset.DefaultResultSetHandler;
+import com.wxttw.frameworks.mybatis.executor.resultset.ResultSetHandler;
 import com.wxttw.frameworks.mybatis.executor.statement.RoutingStatementHandler;
 import com.wxttw.frameworks.mybatis.executor.statement.StatementHandler;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
@@ -62,6 +64,10 @@ public class Configuration {
 
     public MappedStatement getMappedStatement(String id) {
         return this.mappedStatementMap.get(id);
+    }
+
+    public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement) {
+        return new DefaultResultSetHandler(executor, mappedStatement);
     }
 
     public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement) {

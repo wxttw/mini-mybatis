@@ -4,12 +4,13 @@
 3.executor的实现
 4.添加transaction manager
 5.更新mapper的代理
-6.添加parameter handler和resultset handler #
+6.添加statement handler
+7.添加resultset handler
+8.添加parameter handler
+9.添加type handler
 
 第二阶段：
-7.一二级缓存
-8.注解开发
-9.与spring整合
-
-追加：
-10.mybatis插件
+session/mapper cache
+mybatis annotation
+spring integration
+mybatis plugin

@@ -2,6 +2,7 @@ package com.wxttw.frameworks.mybatis.executor.statement;
 
 import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.executor.Executor;
+import com.wxttw.frameworks.mybatis.executor.resultset.ResultSetHandler;
 import com.wxttw.frameworks.mybatis.mapping.BoundSql;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 
@@ -18,6 +19,8 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     protected final Configuration configuration;
     protected final Executor executor;
+
+    protected final ResultSetHandler resultSetHandler;
     protected final MappedStatement mappedStatement;
     protected BoundSql boundSql;
 
@@ -27,6 +30,7 @@ public abstract class BaseStatementHandler implements StatementHandler {
         this.executor = executor;
         this.mappedStatement = mappedStatement;
 
+        this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement);
         this.boundSql = mappedStatement.getBoundSql();
     }
 

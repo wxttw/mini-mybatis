@@ -1,6 +1,7 @@
 package com.wxttw.frameworks.mybatis.executor.statement;
 
 import com.wxttw.frameworks.mybatis.executor.Executor;
+import com.wxttw.frameworks.mybatis.executor.resultset.ResultSetHandler;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 
 import java.lang.reflect.Field;
@@ -38,31 +39,9 @@ public class SimpleStatementHandler extends BaseStatementHandler {
 
     @Override
     public <E> List<E> query(Statement statement) throws SQLException {
-        List<Object> result = new ArrayList<Object>();
-
-        try {
-            PreparedStatement ps = (PreparedStatement) statement;
-            ps.execute();
-
-            Class<?> resultTypeClass = mappedStatement.getResultTypeClass();
-            ResultSet resultSet = ps.executeQuery();
-
-            while (resultSet.next()) {
-                //遍历封装Result
-                Object newInstance = resultTypeClass.getDeclaredConstructor().newInstance();
-                int columnCount = resultSet.getMetaData().getColumnCount();
-                for (int i = 1; i <= columnCount; i++) {
-                    String columnName = resultSet.getMetaData().getColumnName(i);
-                    Field field = resultTypeClass.getDeclaredField(columnName);
-                    field.setAccessible(true);
-                    field.set(newInstance, resultSet.getObject(columnName));
-                }
-                result.add(newInstance);
-            }
-        } catch (Exception e) {
-            //log.error("handlePreparedStatementSelect-exception: {}", e.getMessage());
-        }
-        return (List<E>) result;
+        String sql = boundSql.getOriginalSql();
+        statement.execute(sql);
+        return resultSetHandler.handleResultSets(statement);
     }
 
     private String getParamenteTypeString(Class<?> clazz) {

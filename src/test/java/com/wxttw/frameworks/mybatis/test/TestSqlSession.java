@@ -54,7 +54,7 @@ public class TestSqlSession {
             SqlSession sqlSession = factory.openSession();
 
             User user = new User();
-            user.setUsername("henry");
+            user.setUsername("summy");
             Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.insert", user);
             System.out.println(res);
         } catch (Exception e) {
@@ -70,8 +70,8 @@ public class TestSqlSession {
             SqlSession sqlSession = factory.openSession();
 
             User user = new User();
-            user.setId(3L);
-            user.setUsername("leo");
+            user.setId(6L);
+            user.setUsername("leo_update");
             Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.update", user);
             System.out.println(res);
         } catch (Exception e) {
