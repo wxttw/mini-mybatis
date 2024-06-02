@@ -5,6 +5,7 @@ import com.wxttw.frameworks.mybatis.mapping.SqlSource;
 import com.wxttw.frameworks.mybatis.util.ClassUtil;
 import com.wxttw.frameworks.mybatis.util.DocumentReader;
 import com.wxttw.frameworks.mybatis.util.SqlCommandType;
+import com.wxttw.frameworks.mybatis.util.StatementType;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
@@ -57,8 +58,9 @@ public class XmlMapperBuilder {
             String resultType = element.attributeValue("resultType");
 
             configuration.addMappedStatement(id, MappedStatement.builder()
+                    .configuration(configuration)
                     .id(id)
-                    .statementType(statementType)
+                    .statementType(buildStatementType(statementType))
                     .parameterTypeClass(ClassUtil.getClazz(parameterType))
                     .resultTypeClass(ClassUtil.getClazz(resultType))
                     .sqlSource(new SqlSource(element.getTextTrim()))
@@ -67,6 +69,13 @@ public class XmlMapperBuilder {
         });
 
         bindMapperForNamespace();
+    }
+
+    private StatementType buildStatementType(String statementType) {
+        if (StringUtils.isBlank(statementType)) {
+            return StatementType.STATEMENT;
+        }
+        return StatementType.valueOf(statementType.toUpperCase());
     }
 
     private void bindMapperForNamespace() {

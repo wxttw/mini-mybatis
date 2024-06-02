@@ -92,7 +92,7 @@ public class JdbcTransaction implements Transaction {
 
     @Override
     public Integer getTimeout() throws SQLException {
-        return null;
+        return 100;
     }
 
     protected void openConnection() throws SQLException {

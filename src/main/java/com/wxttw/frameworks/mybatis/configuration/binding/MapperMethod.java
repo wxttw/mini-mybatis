@@ -4,6 +4,7 @@ import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
 import com.wxttw.frameworks.mybatis.util.SqlCommandType;
+import lombok.Getter;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.ParameterizedType;
@@ -17,35 +18,67 @@ import java.sql.SQLException;
  */
 public class MapperMethod {
 
-    private final Class<?> mapperInterface;
-    private final Method method;
-    private final Configuration configuration;
+    private final SqlCommand command;
+    private final MethodSignature method;
 
     public MapperMethod(Class<?> mapperInterface, Method method, Configuration configuration) {
-        this.mapperInterface = mapperInterface;
-        this.method = method;
-        this.configuration = configuration;
+        this.command = new SqlCommand(mapperInterface, method, configuration);
+        this.method = new MethodSignature(method);
     }
 
     public Object execute(SqlSession sqlSession, Object[] args) throws SQLException {
-        //方法名
-        String methodName = method.getName();
-        //接口全限定名
-        String className = method.getDeclaringClass().getName();
-        String statementId = className + "." + methodName;
-        //获取方法被调用的返回值类型
-        Type genericReturnType = method.getGenericReturnType();
 
-        MappedStatement mappedStatement = this.configuration.getMappedStatementMap().get(statementId);
-
-        if (SqlCommandType.INSERT.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-            return sqlSession.insert(statementId, args);
-        } else if (SqlCommandType.UPDATE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-            return sqlSession.update(statementId, args);
-        } else if (SqlCommandType.DELETE.name().equalsIgnoreCase(mappedStatement.getSqlCommandType().name())) {
-            return sqlSession.delete(statementId, args);
+        Object result;
+        switch (command.getType()) {
+            case INSERT: {
+                result = sqlSession.insert(command.getName(), args);
+                break;
+            }
+            case UPDATE: {
+                result = sqlSession.update(command.getName(), args);
+                break;
+            }
+            case DELETE: {
+                result = sqlSession.delete(command.getName(), args);
+                break;
+            }
+            case SELECT: {
+                if (method.returnsMany) {
+                    result = sqlSession.selectList(command.getName(), args);
+                } else {
+                    result = sqlSession.selectOne(command.getName(), args);
+                }
+                break;
+            }
+            default:
+                throw new RuntimeException("Unknown execution method for: " + command.getName());
         }
-        return genericReturnType instanceof ParameterizedType ?
-                sqlSession.selectList(statementId, args) : sqlSession.selectOne(statementId, args);
+        return result;
+    }
+
+    @Getter
+    public static class SqlCommand {
+        private final String name;
+        private final SqlCommandType type;
+
+        public SqlCommand(Class<?> mapperInterface, Method method, Configuration configuration) {
+
+            String statementId = mapperInterface.getName() + "." + method.getName();
+            MappedStatement mappedStatement = configuration.getMappedStatement(statementId);
+
+            name = mappedStatement.getId();
+            type = mappedStatement.getSqlCommandType();
+        }
+    }
+
+    @Getter
+    public static class MethodSignature {
+        private final boolean returnsMany;
+        private final Type returnType;
+
+        public MethodSignature(Method method) {
+            this.returnType = method.getGenericReturnType();
+            this.returnsMany = this.returnType instanceof ParameterizedType;
+        }
     }
 }

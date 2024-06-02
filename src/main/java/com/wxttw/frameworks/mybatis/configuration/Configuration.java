@@ -1,11 +1,17 @@
 package com.wxttw.frameworks.mybatis.configuration;
 
 import com.wxttw.frameworks.mybatis.configuration.binding.MapperRegistry;
+import com.wxttw.frameworks.mybatis.configuration.transaction.Transaction;
 import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory;
 import com.wxttw.frameworks.mybatis.configuration.transaction.jdbc.JdbcTransactionFactory;
+import com.wxttw.frameworks.mybatis.executor.Executor;
+import com.wxttw.frameworks.mybatis.executor.SimpleExecutor;
+import com.wxttw.frameworks.mybatis.executor.statement.RoutingStatementHandler;
+import com.wxttw.frameworks.mybatis.executor.statement.StatementHandler;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
 import com.wxttw.frameworks.mybatis.type.TypeAliasRegistry;
+import com.wxttw.frameworks.mybatis.util.ExecutorType;
 import lombok.Data;
 import org.apache.commons.dbcp.BasicDataSource;
 
@@ -19,6 +25,8 @@ import java.util.Map;
  */
 @Data
 public class Configuration {
+
+    protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
 
     private TransactionFactory transactionFactory;
     private BasicDataSource dataSource;
@@ -52,5 +60,22 @@ public class Configuration {
         this.mappedStatementMap.put(statementId, mappedStatement);
     }
 
+    public MappedStatement getMappedStatement(String id) {
+        return this.mappedStatementMap.get(id);
+    }
+
+    public StatementHandler newStatementHandler(Executor executor, MappedStatement mappedStatement) {
+        return new RoutingStatementHandler(executor, mappedStatement);
+    }
+
+    public Executor newExecutor(Transaction transaction) {
+        return newExecutor(transaction, defaultExecutorType);
+    }
+
+    public Executor newExecutor(Transaction transaction, ExecutorType executorType) {
+        executorType = executorType == null ? defaultExecutorType : executorType;
+        //可以根据情况，扩展更多executor
+        return new SimpleExecutor(this, transaction);
+    }
 
 }

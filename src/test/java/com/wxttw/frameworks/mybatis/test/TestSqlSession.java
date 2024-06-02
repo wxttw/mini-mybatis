@@ -54,7 +54,7 @@ public class TestSqlSession {
             SqlSession sqlSession = factory.openSession();
 
             User user = new User();
-            user.setUsername("mary");
+            user.setUsername("henry");
             Integer res = sqlSession.insert("com.hjj.test.mapper.UserMapper.insert", user);
             System.out.println(res);
         } catch (Exception e) {

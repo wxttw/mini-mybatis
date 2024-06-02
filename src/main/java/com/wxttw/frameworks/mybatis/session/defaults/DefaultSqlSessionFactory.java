@@ -5,7 +5,6 @@ import com.wxttw.frameworks.mybatis.configuration.transaction.Transaction;
 import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory;
 import com.wxttw.frameworks.mybatis.configuration.transaction.jdbc.JdbcTransactionFactory;
 import com.wxttw.frameworks.mybatis.executor.Executor;
-import com.wxttw.frameworks.mybatis.executor.SimpleExecutor;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
 import com.wxttw.frameworks.mybatis.session.SqlSessionFactory;
 
@@ -39,7 +38,7 @@ public class DefaultSqlSessionFactory implements SqlSessionFactory {
         try {
             final TransactionFactory transactionFactory = getTransactionFactoryFromEnvironment();
             tx = transactionFactory.newTransaction(configuration.getDataSource(), level, autoCommit);
-            final Executor executor = new SimpleExecutor(configuration, tx);
+            final Executor executor = configuration.newExecutor(tx);
             return new DefaultSqlSession(configuration, executor, autoCommit);
         } catch (Exception e) {
             closeTransaction(tx); // may have fetched a connection so lets call close()
