@@ -40,6 +40,16 @@ public class ClassUtil {
         return null;
     }
 
+    public static Class<?> getFieldType(Class<?> clazz, String fieldName) {
+        try {
+            Field field = clazz.getDeclaredField(fieldName);
+            return field.getType();
+        } catch (Exception e) {
+            log.error(e.getMessage());
+        }
+        return null;
+    }
+
     public static Set<Class<?>> scanClasses(String packageName) {
         Set<Class<?>> classes = new HashSet<>();
         String path = packageName.replace('.', '/');

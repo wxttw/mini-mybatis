@@ -16,8 +16,8 @@ import java.util.List;
  */
 public class SimpleStatementHandler extends BaseStatementHandler {
 
-    public SimpleStatementHandler(Executor executor, MappedStatement mappedStatement) {
-        super(executor, mappedStatement);
+    public SimpleStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject) {
+        super(executor, mappedStatement, parameterObject);
     }
 
     @Override
@@ -26,7 +26,7 @@ public class SimpleStatementHandler extends BaseStatementHandler {
     }
 
     @Override
-    public void parameterize(Statement statement, Object params) throws SQLException {
+    public void parameterize(Statement statement) throws SQLException {
 
     }
 

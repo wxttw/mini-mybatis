@@ -57,13 +57,14 @@ public class XmlMapperBuilder {
             String parameterType = element.attributeValue("parameterType");
             String resultType = element.attributeValue("resultType");
 
+            SqlSource sqlSource = new SqlSource(this.configuration, element.getTextTrim(), ClassUtil.getClazz(parameterType));
             configuration.addMappedStatement(id, MappedStatement.builder()
                     .configuration(configuration)
                     .id(id)
                     .statementType(buildStatementType(statementType))
                     .parameterTypeClass(ClassUtil.getClazz(parameterType))
                     .resultTypeClass(ClassUtil.getClazz(resultType))
-                    .sqlSource(new SqlSource(element.getTextTrim()))
+                    .sqlSource(sqlSource)
                     .sqlCommandType(SqlCommandType.valueOf(sqlCommandType))
                     .build());
         });

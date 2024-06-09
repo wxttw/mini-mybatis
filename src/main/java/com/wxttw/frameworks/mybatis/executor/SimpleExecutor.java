@@ -34,8 +34,8 @@ public class SimpleExecutor implements Executor {
         Statement stmt = null;
         try {
             Configuration configuration = mappedStatement.getConfiguration();
-            StatementHandler handler = configuration.newStatementHandler(this, mappedStatement);
-            stmt = prepareStatement(handler, params);
+            StatementHandler handler = configuration.newStatementHandler(this, mappedStatement, params);
+            stmt = prepareStatement(handler);
             return handler.<T>query(stmt);
         } finally {
             closeStatement(stmt);
@@ -47,8 +47,8 @@ public class SimpleExecutor implements Executor {
         Statement stmt = null;
         try {
             Configuration configuration = mappedStatement.getConfiguration();
-            StatementHandler handler = configuration.newStatementHandler(this, mappedStatement);
-            stmt = prepareStatement(handler, params);
+            StatementHandler handler = configuration.newStatementHandler(this, mappedStatement, params);
+            stmt = prepareStatement(handler);
             return handler.update(stmt);
         } finally {
             closeStatement(stmt);
@@ -59,11 +59,11 @@ public class SimpleExecutor implements Executor {
         return transaction.getConnection();
     }
 
-    private Statement prepareStatement(StatementHandler handler, Object params) throws SQLException {
+    private Statement prepareStatement(StatementHandler handler) throws SQLException {
         Statement stmt;
         Connection connection = getConnection();
         stmt = handler.prepare(connection, transaction.getTimeout());
-        handler.parameterize(stmt, params);
+        handler.parameterize(stmt);
         return stmt;
     }
 

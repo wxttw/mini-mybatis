@@ -6,14 +6,16 @@ import java.util.regex.Pattern;
 
 public class GenericTokenParser {
 
+    private String pattern;
     private final TokenHandler handler;
 
-    public GenericTokenParser(TokenHandler handler) {
+    public GenericTokenParser(String pattern, TokenHandler handler) {
+        this.pattern = pattern;
         this.handler = handler;
     }
 
     public String parse(String sql) {
-        Pattern pattern = Pattern.compile("#\\{([^}]+)}");
+        Pattern pattern = Pattern.compile(this.pattern);
         Matcher matcher = pattern.matcher(sql);
         StringBuilder sb = new StringBuilder();
         while (matcher.find()) {

@@ -17,13 +17,13 @@ public class RoutingStatementHandler implements StatementHandler {
 
     private final StatementHandler delegate;
 
-    public RoutingStatementHandler(Executor executor, MappedStatement ms) {
+    public RoutingStatementHandler(Executor executor, MappedStatement ms, Object parameterObject) {
         switch (ms.getStatementType()) {
             case STATEMENT:
-                delegate = new SimpleStatementHandler(executor, ms);
+                delegate = new SimpleStatementHandler(executor, ms, parameterObject);
                 break;
             case PREPARED:
-                delegate = new PreparedStatementHandler(executor, ms);
+                delegate = new PreparedStatementHandler(executor, ms, parameterObject);
                 break;
             case CALLABLE:
                 //TODO: 暂不实现
@@ -38,8 +38,8 @@ public class RoutingStatementHandler implements StatementHandler {
     }
 
     @Override
-    public void parameterize(Statement statement, Object params) throws SQLException {
-        delegate.parameterize(statement, params);
+    public void parameterize(Statement statement) throws SQLException {
+        delegate.parameterize(statement);
     }
 
     @Override

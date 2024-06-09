@@ -2,6 +2,7 @@ package com.wxttw.frameworks.mybatis.executor.statement;
 
 import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.executor.Executor;
+import com.wxttw.frameworks.mybatis.executor.parameter.ParameterHandler;
 import com.wxttw.frameworks.mybatis.executor.resultset.ResultSetHandler;
 import com.wxttw.frameworks.mybatis.mapping.BoundSql;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
@@ -19,19 +20,24 @@ public abstract class BaseStatementHandler implements StatementHandler {
 
     protected final Configuration configuration;
     protected final Executor executor;
+    protected final Object parameterObject;
 
+    protected final ParameterHandler parameterHandler;
     protected final ResultSetHandler resultSetHandler;
     protected final MappedStatement mappedStatement;
     protected BoundSql boundSql;
 
 
-    protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement) {
+    protected BaseStatementHandler(Executor executor, MappedStatement mappedStatement, Object parameterObject) {
         this.configuration = mappedStatement.getConfiguration();
         this.executor = executor;
         this.mappedStatement = mappedStatement;
-
-        this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement);
+        this.parameterObject = parameterObject;
         this.boundSql = mappedStatement.getBoundSql();
+
+        this.parameterHandler = configuration.newParameterHandler(mappedStatement, parameterObject, boundSql);
+        this.resultSetHandler = configuration.newResultSetHandler(executor, mappedStatement);
+
     }
 
     public Statement prepare(Connection connection, Integer transactionTimeout) throws SQLException {
