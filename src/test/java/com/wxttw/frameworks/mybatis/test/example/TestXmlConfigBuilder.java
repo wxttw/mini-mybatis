@@ -1,4 +1,4 @@
-package com.wxttw.frameworks.mybatis.test;
+package com.wxttw.frameworks.mybatis.test.example;
 
 import com.wxttw.frameworks.mybatis.configuration.XmlConfigBuilder;
 import com.wxttw.frameworks.mybatis.io.Resources;

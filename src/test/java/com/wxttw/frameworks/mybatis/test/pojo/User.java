@@ -1,4 +1,4 @@
-package com.hjj.test.pojo;
+package com.wxttw.frameworks.mybatis.test.pojo;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

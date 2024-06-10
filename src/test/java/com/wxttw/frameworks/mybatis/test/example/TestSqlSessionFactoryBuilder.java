@@ -1,4 +1,4 @@
-package com.wxttw.frameworks.mybatis.test;
+package com.wxttw.frameworks.mybatis.test.example;
 
 import com.wxttw.frameworks.mybatis.io.Resources;
 import com.wxttw.frameworks.mybatis.session.SqlSession;

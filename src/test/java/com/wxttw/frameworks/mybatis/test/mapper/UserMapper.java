@@ -1,6 +1,6 @@
-package com.hjj.test.mapper;
+package com.wxttw.frameworks.mybatis.test.mapper;
 
-import com.hjj.test.pojo.User;
+import com.wxttw.frameworks.mybatis.test.pojo.User;
 
 import java.util.List;
 

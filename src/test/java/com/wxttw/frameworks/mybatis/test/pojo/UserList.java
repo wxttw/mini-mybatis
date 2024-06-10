@@ -1,4 +1,4 @@
-package com.hjj.test.pojo;
+package com.wxttw.frameworks.mybatis.test.pojo;
 
 import java.util.List;
 
