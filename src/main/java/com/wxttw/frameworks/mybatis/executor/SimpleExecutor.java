@@ -3,8 +3,9 @@ package com.wxttw.frameworks.mybatis.executor;
 import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.configuration.transaction.Transaction;
 import com.wxttw.frameworks.mybatis.executor.statement.StatementHandler;
+import com.wxttw.frameworks.mybatis.logging.Log;
+import com.wxttw.frameworks.mybatis.logging.LogFactory;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
-import lombok.extern.slf4j.Slf4j;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -16,9 +17,10 @@ import java.util.List;
  * @date 2024/4/14 11:54
  * @description: TODO
  */
-@Slf4j
+
 public class SimpleExecutor implements Executor {
 
+    private static final Log log = LogFactory.getLog(SimpleExecutor.class);
     private Configuration configuration;
     private Transaction transaction;
 

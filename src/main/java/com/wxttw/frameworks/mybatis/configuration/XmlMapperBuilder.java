@@ -6,7 +6,6 @@ import com.wxttw.frameworks.mybatis.util.ClassUtil;
 import com.wxttw.frameworks.mybatis.util.DocumentReader;
 import com.wxttw.frameworks.mybatis.util.SqlCommandType;
 import com.wxttw.frameworks.mybatis.util.StatementType;
-import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.dom4j.Document;
 import org.dom4j.Element;
@@ -20,7 +19,6 @@ import java.util.List;
  * @date 2024/4/5 23:56
  * @description: 解析所有的Mapper配置文件，封装所以SQL语句标签到MappedStatement对象中
  */
-@Slf4j
 public class XmlMapperBuilder {
 
     private InputStream inputStream;

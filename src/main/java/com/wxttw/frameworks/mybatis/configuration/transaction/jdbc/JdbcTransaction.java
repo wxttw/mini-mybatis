@@ -1,7 +1,8 @@
 package com.wxttw.frameworks.mybatis.configuration.transaction.jdbc;
 
 import com.wxttw.frameworks.mybatis.configuration.transaction.Transaction;
-import lombok.extern.slf4j.Slf4j;
+import com.wxttw.frameworks.mybatis.logging.Log;
+import com.wxttw.frameworks.mybatis.logging.LogFactory;
 
 import javax.sql.DataSource;
 import java.sql.Connection;
@@ -12,8 +13,10 @@ import java.sql.SQLException;
  * @date 2024/5/2 19:17
  * @description: TODO
  */
-@Slf4j
+
 public class JdbcTransaction implements Transaction {
+
+    private static final Log log = LogFactory.getLog(JdbcTransaction.class);
 
     protected Connection connection;
     protected DataSource dataSource;
@@ -41,7 +44,9 @@ public class JdbcTransaction implements Transaction {
     @Override
     public void commit() throws SQLException {
         if (connection != null && !connection.getAutoCommit()) {
-            log.info("Committing JDBC Connection [" + connection + "]");
+            if (log.isDebugEnabled()) {
+                log.debug("Committing JDBC Connection [" + connection + "]");
+            }
             connection.commit();
         }
     }
@@ -49,7 +54,9 @@ public class JdbcTransaction implements Transaction {
     @Override
     public void rollback() throws SQLException {
         if (connection != null && !connection.getAutoCommit()) {
-            log.info("Rolling back JDBC Connection [" + connection + "]");
+            if (log.isDebugEnabled()) {
+                log.debug("Rolling back JDBC Connection [" + connection + "]");
+            }
             connection.rollback();
         }
     }
@@ -58,7 +65,9 @@ public class JdbcTransaction implements Transaction {
     public void close() throws SQLException {
         if (connection != null) {
             resetAutoCommit();
-            log.info("Closing JDBC Connection [" + connection + "]");
+            if (log.isDebugEnabled()) {
+                log.debug("Closing JDBC Connection [" + connection + "]");
+            }
             connection.close();
         }
     }
@@ -66,7 +75,9 @@ public class JdbcTransaction implements Transaction {
     protected void setDesiredAutoCommit(boolean desiredAutoCommit) {
         try {
             if (connection.getAutoCommit() != desiredAutoCommit) {
-                log.info("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
+                if (log.isDebugEnabled()) {
+                    log.debug("Setting autocommit to " + desiredAutoCommit + " on JDBC Connection [" + connection + "]");
+                }
                 connection.setAutoCommit(desiredAutoCommit);
             }
         } catch (SQLException e) {
@@ -80,7 +91,9 @@ public class JdbcTransaction implements Transaction {
     private void resetAutoCommit() {
         try {
             if (!connection.getAutoCommit()) {
-                log.info("Resetting autocommit to true on JDBC Connection [" + connection + "]");
+                if (log.isDebugEnabled()) {
+                    log.debug("Resetting autocommit to true on JDBC Connection [" + connection + "]");
+                }
                 connection.setAutoCommit(true);
             }
         } catch (SQLException e) {

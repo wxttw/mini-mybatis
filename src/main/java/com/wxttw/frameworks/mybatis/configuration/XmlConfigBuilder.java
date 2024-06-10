@@ -2,6 +2,7 @@ package com.wxttw.frameworks.mybatis.configuration;
 
 import com.wxttw.frameworks.mybatis.configuration.transaction.TransactionFactory;
 import com.wxttw.frameworks.mybatis.io.Resources;
+import com.wxttw.frameworks.mybatis.logging.Log;
 import com.wxttw.frameworks.mybatis.type.TypeAliasRegistry;
 import com.wxttw.frameworks.mybatis.util.DocumentReader;
 import org.apache.commons.dbcp.BasicDataSource;
@@ -44,10 +45,22 @@ public class XmlConfigBuilder {
 
     private void parseConfiguration(Element element) {
 
+        parseSettings(element.element("settings"));
         //解析<environments>
         parseEnvironments(element.element("environments"));
         //解析<mappers>
         parseMappers(element.element("mappers"));
+    }
+
+    private void parseSettings(Element element) {
+
+        Properties props = new Properties();
+        element.elements("setting").forEach(ele -> {
+            props.setProperty(ele.attributeValue("name"), ele.attributeValue("value"));
+        });
+
+        Class<? extends Log> logImpl = (Class<? extends Log>)resolveClass(props.getProperty("logImpl"));
+        configuration.setLogImpl(logImpl);
     }
 
     private void parseEnvironments(Element element) {

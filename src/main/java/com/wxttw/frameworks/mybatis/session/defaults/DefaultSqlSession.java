@@ -4,7 +4,6 @@ import com.wxttw.frameworks.mybatis.configuration.Configuration;
 import com.wxttw.frameworks.mybatis.executor.Executor;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
-import lombok.extern.slf4j.Slf4j;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -14,7 +13,6 @@ import java.util.List;
  * @date 2024/4/7 14:34
  * @description: TODO
  */
-@Slf4j
 public class DefaultSqlSession implements SqlSession {
 
     private final Configuration configuration;

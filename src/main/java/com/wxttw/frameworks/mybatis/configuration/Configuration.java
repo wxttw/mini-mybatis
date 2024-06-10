@@ -12,11 +12,17 @@ import com.wxttw.frameworks.mybatis.executor.resultset.DefaultResultSetHandler;
 import com.wxttw.frameworks.mybatis.executor.resultset.ResultSetHandler;
 import com.wxttw.frameworks.mybatis.executor.statement.RoutingStatementHandler;
 import com.wxttw.frameworks.mybatis.executor.statement.StatementHandler;
+import com.wxttw.frameworks.mybatis.logging.Log;
+import com.wxttw.frameworks.mybatis.logging.LogFactory;
+import com.wxttw.frameworks.mybatis.logging.commons.JakartaCommonsLoggingImpl;
+import com.wxttw.frameworks.mybatis.logging.log4j.Log4jImpl;
+import com.wxttw.frameworks.mybatis.logging.nologging.NoLoggingImpl;
+import com.wxttw.frameworks.mybatis.logging.slf4j.Slf4jImpl;
+import com.wxttw.frameworks.mybatis.logging.stdout.StdOutImpl;
 import com.wxttw.frameworks.mybatis.mapping.BoundSql;
 import com.wxttw.frameworks.mybatis.mapping.MappedStatement;
 import com.wxttw.frameworks.mybatis.session.SqlSession;
 import com.wxttw.frameworks.mybatis.type.TypeAliasRegistry;
-
 import com.wxttw.frameworks.mybatis.type.TypeHandlerRegistry;
 import com.wxttw.frameworks.mybatis.util.ExecutorType;
 import lombok.Data;
@@ -36,6 +42,7 @@ public class Configuration {
     protected ExecutorType defaultExecutorType = ExecutorType.SIMPLE;
     private TransactionFactory transactionFactory;
     private BasicDataSource dataSource;
+    protected Class <? extends Log> logImpl;
 
     private final TypeAliasRegistry typeAliasRegistry = new TypeAliasRegistry();
     private final TypeHandlerRegistry typeHandlerRegistry = new TypeHandlerRegistry();
@@ -45,6 +52,23 @@ public class Configuration {
 
     public Configuration() {
         typeAliasRegistry.registerAlias("JDBC", JdbcTransactionFactory.class);
+
+        typeAliasRegistry.registerAlias("SLF4J", Slf4jImpl.class);
+        typeAliasRegistry.registerAlias("COMMONS_LOGGING", JakartaCommonsLoggingImpl.class);
+        typeAliasRegistry.registerAlias("LOG4J", Log4jImpl.class);
+        typeAliasRegistry.registerAlias("STDOUT_LOGGING", StdOutImpl.class);
+        typeAliasRegistry.registerAlias("NO_LOGGING", NoLoggingImpl.class);
+    }
+
+    public Class<? extends Log> getLogImpl() {
+        return logImpl;
+    }
+
+    public void setLogImpl(Class<? extends Log> logImpl) {
+        if (logImpl != null) {
+            this.logImpl = logImpl;
+            LogFactory.useCustomLogging(this.logImpl);
+        }
     }
 
     public TypeHandlerRegistry getTypeHandlerRegistry() {
@@ -78,6 +102,7 @@ public class Configuration {
     public ParameterHandler newParameterHandler(MappedStatement mappedStatement, Object parameterObject, BoundSql boundSql) {
         return new DefaultParameterHandler(mappedStatement, parameterObject, boundSql);
     }
+
     public ResultSetHandler newResultSetHandler(Executor executor, MappedStatement mappedStatement) {
         return new DefaultResultSetHandler(executor, mappedStatement);
     }

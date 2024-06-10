@@ -8,6 +8,7 @@
 7.添加resultset handler
 8.添加parameter handler
 9.添加type handler
+10.添加log module
 
 第二阶段：
 session/mapper cache

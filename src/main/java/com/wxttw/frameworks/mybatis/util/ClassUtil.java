@@ -1,5 +1,7 @@
 package com.wxttw.frameworks.mybatis.util;
 
+import com.wxttw.frameworks.mybatis.logging.Log;
+import com.wxttw.frameworks.mybatis.logging.LogFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 
@@ -14,8 +16,10 @@ import java.util.Set;
  * @description: TODO
  */
 
-@Slf4j
+
 public class ClassUtil {
+
+    private static final Log log = LogFactory.getLog(ClassUtil.class);
 
     public static Class<?> getClazz(String paramsType) {
         if (StringUtils.isBlank(paramsType)) {
